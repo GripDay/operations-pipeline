@@ -1,14 +1,19 @@
-# Blank Project Name 🚀
+# ✨ DevOps Operations Pipeline
 
-<details>
-  <summary><strong>✅ Pre-publish checklist (remove in final README)</strong></summary>
+Standardize CI/CD across GripDay projects with a small, batteries-included toolkit for commit quality gates, and service deployment descriptors.
 
-- [ ] Title updated and logo added
-- [ ] Badges added (CI, tests, coverage, license)
-- [ ] About/Usage/Installation/Commands completed
-- [ ] Development prerequisites and environment documented
-- [ ] Architecture notes reflect your stack and modules
-- [ ] Links verified (Getting Started, docs, external resources)
-- [ ] This guidance removed before publishing
+---
 
-</details>
+## 🗂️ Services directory
+
+The `services/` folder contains YAML descriptors that describe GripDay services targeted by CI/CD. Examples include:
+
+- `services/operations-pipeline.yml`
+- `services/gripday.yml`
+- `services/gripday-*.yml`
+
+These files are referenced by automation to orchestrate environments and deployments. When introducing a new service:
+
+- Add a descriptive YAML in `services/`
+- Keep names consistent and self-explanatory
+- Prefer small, composable descriptors to large monoliths.
