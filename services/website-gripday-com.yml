@@ -51,11 +51,13 @@ volumes:
     host:
       path: /app/.pnpm-store
 steps:
+
   - name: download-dockerfile
     image: cicdtools/pipeline-runner
     pull: if-not-exists
     commands:
       - wget -O ./Dockerfile https://raw.githubusercontent.com/KnowHowDevOps/homelab-operations-pipeline/dev/resources/Nginx.dockerfile
+
   - name: build-container
     image: plugins/docker
     settings:
