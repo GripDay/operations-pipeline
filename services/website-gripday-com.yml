@@ -78,8 +78,8 @@ steps:
       tags:
         - latest
 
- ---
- 
+---
+
 kind: pipeline
 name: DeployOnUAT
 type: docker
