@@ -1,5 +1,5 @@
 kind: pipeline
-name: CI
+name: VerifyCode
 type: docker
 
 trigger:
@@ -12,7 +12,7 @@ volumes:
     host:
       path: /app/.pnpm-store
 steps:
-  - name: build-docs
+  - name: verify
     image: cicdtools/pipeline-runner
     pull: if-not-exists
     volumes:
@@ -24,15 +24,45 @@ steps:
       NEXUS_DEPLOYER_PASSWORD:
         from_secret: NEXUS_DEPLOYER_PASSWORD
     commands:
-      - wget -O ./Dockerfile https://raw.githubusercontent.com/KnowHowDevOps/homelab-operations-pipeline/dev/resources/Nginx.dockerfile
       - pnpm install
-      - pnpm lint
       - pnpm prettier:check
+
+---
+kind: pipeline
+name: PublishArtifacts
+type: docker
+
+trigger:
+  event:
+    - push
+    - tag
+  ref:
+    - refs/heads/dev
+    - refs/heads/prerelease/*
+    - refs/heads/*.*.x
+    - refs/tags/*
+depends_on:
+  - VerifyCode
+
+volumes:
+  - name: pnpm-store
+    host:
+      path: /app/.pnpm-store
+steps:
+  - name: download-dockerfile
+    image: cicdtools/pipeline-runner
+    pull: if-not-exists
+    commands:
+      - wget -O ./Dockerfile https://raw.githubusercontent.com/KnowHowDevOps/homelab-operations-pipeline/dev/resources/Nginx.dockerfile
+
+  - name: build-docs
+    image: cicdtools/pipeline-runner
+    pull: if-not-exists
+    commands:
+      - pnpm install
       - pnpm docs:build
 
   - name: build-container
-    depends_on:
-      - build-docs
     image: plugins/docker
     settings:
       dockerfile: ./Dockerfile
@@ -52,6 +82,45 @@ steps:
       tags:
         - latest
 
+---
+kind: pipeline
+name: DeployOnUAT
+type: docker
+
+trigger:
+  event:
+    - push
+    - tag
+  ref:
+    - refs/heads/dev
+    - refs/heads/prerelease/*
+    - refs/heads/*.*.x
+    - refs/tags/*
+depends_on:
+  - PublishArtifacts
+
+volumes:
+  - name: pnpm-store
+    host:
+      path: /app/.pnpm-store
+steps:
+  - name: deploy
+    image: cicdtools/pipeline-runner
+    pull: never
+    environment:
+      HELM_CHARTS_REPOSITORY:
+        from_secret: HELM_CHARTS_REPOSITORY
+      SVC_CONTAINER_REGISTRY_USERNAME:
+        from_secret: SVC_CONTAINER_REGISTRY_USERNAME
+      SVC_CONTAINER_REGISTRY_PASSWORD:
+        from_secret: SVC_CONTAINER_REGISTRY_PASSWORD
+    commands:
+      - git clone $${HELM_CHARTS_REPOSITORY} charts && cd charts/services/${DRONE_REPO_NAME}
+      - kubectl version --output=yaml
+      - helm uninstall -n uat-env --ignore-not-found ${DRONE_REPO_NAME}
+      - helm template ${DRONE_REPO_NAME} ./ --values ./values.yaml --values ./uat-values.yaml --set image.tag=latest -n uat-env
+      - helm upgrade --install --atomic --wait --timeout 2m ${DRONE_REPO_NAME} ./ --values ./values.yaml --values ./uat-values.yaml --set image.tag=latest -n uat-env
+
   - name: notify-slack
     image: plugins/slack
     settings:
@@ -70,4 +139,4 @@ steps:
         - failure
         - success
     depends_on:
-      - build-container
+      - deploy
