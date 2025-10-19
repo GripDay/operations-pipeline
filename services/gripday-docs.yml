@@ -84,7 +84,7 @@ steps:
 
 ---
 kind: pipeline
-name: DeployOnUAT
+name: DeployOnStaging
 type: docker
 
 trigger:
@@ -118,8 +118,8 @@ steps:
       - git clone $${HELM_CHARTS_REPOSITORY} charts && cd charts/services/${DRONE_REPO_NAME}
       - kubectl version --output=yaml
       - helm uninstall -n uat-env --ignore-not-found ${DRONE_REPO_NAME}
-      - helm template ${DRONE_REPO_NAME} ./ --values ./values.yaml --values ./uat-values.yaml --set image.tag=latest -n uat-env
-      - helm upgrade --install --atomic --wait --timeout 2m ${DRONE_REPO_NAME} ./ --values ./values.yaml --values ./uat-values.yaml --set image.tag=latest -n uat-env
+      - helm template ${DRONE_REPO_NAME} ./ --values ./values.yaml --values ./staging-values.yaml --set image.tag=latest -n uat-env
+      - helm upgrade --install --atomic --wait --timeout 2m ${DRONE_REPO_NAME} ./ --values ./values.yaml --values ./staging-values.yaml --set image.tag=latest -n uat-env
 
   - name: notify-slack
     image: plugins/slack
