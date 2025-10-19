@@ -117,9 +117,9 @@ steps:
     commands:
       - git clone $${HELM_CHARTS_REPOSITORY} charts && cd charts/services/${DRONE_REPO_NAME}
       - kubectl version --output=yaml
-      - helm uninstall -n uat-env --ignore-not-found ${DRONE_REPO_NAME}
-      - helm template ${DRONE_REPO_NAME} ./ --values ./values.yaml --values ./staging-values.yaml --set image.tag=latest -n uat-env
-      - helm upgrade --install --atomic --wait --timeout 2m ${DRONE_REPO_NAME} ./ --values ./values.yaml --values ./staging-values.yaml --set image.tag=latest -n uat-env
+      - helm uninstall -n staging-env --ignore-not-found ${DRONE_REPO_NAME}
+      - helm template ${DRONE_REPO_NAME} ./ --values ./values.yaml --values ./staging-values.yaml --set image.tag=latest -n staging-env
+      - helm upgrade --install --atomic --wait --timeout 2m ${DRONE_REPO_NAME} ./ --values ./values.yaml --values ./staging-values.yaml --set image.tag=latest -n staging-env
 
   - name: notify-slack
     image: plugins/slack
