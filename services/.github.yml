@@ -1,17 +1,24 @@
+# Drone CI Pipeline for GitHub Integration
+# Runs code quality checks on push and tag events
+
 kind: pipeline
 name: CI
 type: docker
 
+# Trigger: Runs on every push and tag creation
 trigger:
   event:
     - push
     - tag
 
+# Shared volume for pnpm package cache to speed up builds
 volumes:
   - name: pnpm-store
     host:
       path: /app/.pnpm-store
+
 steps:
+  # Step 1: Build and verify code formatting
   - name: build
     image: cicdtools/pipeline-runner
     pull: if-not-exists
@@ -19,10 +26,11 @@ steps:
       - name: pnpm-store
         path: /root/.pnpm-store
     environment:
+      # Nexus credentials for private package registry access
       NEXUS_DEPLOYER_USERNAME:
         from_secret: NEXUS_DEPLOYER_USERNAME
       NEXUS_DEPLOYER_PASSWORD:
         from_secret: NEXUS_DEPLOYER_PASSWORD
     commands:
-      - pnpm install
-      - pnpm prettier:check
+      - pnpm install # Install dependencies
+      - pnpm prettier:check # Verify code formatting

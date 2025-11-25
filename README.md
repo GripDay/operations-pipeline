@@ -1,6 +1,6 @@
 # ✨ DevOps Operations Pipeline
 
-Standardize CI/CD across GripDay projects with a small, batteries-included toolkit for commit quality gates, and service deployment descriptors.
+Centralized repository for GripDay's CI/CD infrastructure. Contains Drone CI pipeline definitions for automated testing, building, containerization, and deployment to staging environments. Each service pipeline includes code verification, artifact publishing, and Helm-based Kubernetes deployments with Slack notifications.
 
 ---
 
