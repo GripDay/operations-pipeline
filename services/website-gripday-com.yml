@@ -145,7 +145,7 @@ steps:
         from_secret: SVC_CONTAINER_REGISTRY_PASSWORD
     commands:
       # Clone Helm charts and navigate to service directory
-      - git clone ${HELM_CHARTS_REPOSITORY} charts && cd charts/services/${DRONE_REPO_NAME}
+      - git clone $${HELM_CHARTS_REPOSITORY} charts && cd charts/services/${DRONE_REPO_NAME}
       # Verify kubectl connectivity
       - kubectl version --output=yaml
       # Uninstall existing release if present
