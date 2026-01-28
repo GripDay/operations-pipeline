@@ -100,13 +100,13 @@ steps:
 
 ---
 # ============================================================================
-# Pipeline 3: DeployOnStaging
-# Deploys the built container to staging environment using Helm
+# Pipeline 3: DeployOnProduction
+# Deploys the built container to production environment using Helm
 # Sends Slack notification on completion
 # ============================================================================
 
 kind: pipeline
-name: DeployOnStaging
+name: DeployOnProduction
 type: docker
 
 # Trigger: Only runs on specific branches and tags
@@ -131,7 +131,7 @@ volumes:
       path: /app/.pnpm-store
 
 steps:
-  # Step 1: Deploy to staging environment using Helm
+  # Step 1: Deploy to production environment using Helm
   - name: deploy
     image: cicdtools/pipeline-runner
     pull: never
@@ -149,11 +149,11 @@ steps:
       # Verify kubectl connectivity
       - kubectl version --output=yaml
       # Uninstall existing release if present
-      - helm uninstall -n gripday-staging-env --ignore-not-found ${DRONE_REPO_NAME}
-      # Preview Helm template with staging values
-      - helm template ${DRONE_REPO_NAME} ./ --values ./values.yaml --values ./staging-values.yaml --set image.tag=latest -n gripday-staging-env
-      # Deploy to staging with atomic rollback on failure
-      - helm upgrade --install --atomic --wait --timeout 2m ${DRONE_REPO_NAME} ./ --values ./values.yaml --values ./staging-values.yaml --set image.tag=latest -n gripday-staging-env
+      - helm uninstall -n gripday-production-env --ignore-not-found ${DRONE_REPO_NAME}
+      # Preview Helm template with production values
+      - helm template ${DRONE_REPO_NAME} ./ --values ./values.yaml --values ./production-values.yaml --set image.tag=latest -n gripday-production-env
+      # Deploy to production with atomic rollback on failure
+      - helm upgrade --install --atomic --wait --timeout 2m ${DRONE_REPO_NAME} ./ --values ./values.yaml --values ./production-values.yaml --set image.tag=latest -n gripday-production-env
 
   # Step 2: Send deployment notification to Slack
   - name: notify-slack
