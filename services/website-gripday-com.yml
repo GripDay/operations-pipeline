@@ -149,11 +149,11 @@ steps:
       # Verify kubectl connectivity
       - kubectl version --output=yaml
       # Uninstall existing release if present
-      - helm uninstall -n gripday-production-env --ignore-not-found ${DRONE_REPO_NAME}
+      - helm uninstall -n default --ignore-not-found ${DRONE_REPO_NAME}
       # Preview Helm template with production values
-      - helm template ${DRONE_REPO_NAME} ./ --values ./values.yaml --values ./values-production.yaml --set image.tag=latest -n gripday-production-env
+      - helm template ${DRONE_REPO_NAME} ./ --values ./values.yaml --values ./values-production.yaml --set image.tag=latest -n default
       # Deploy to production with atomic rollback on failure
-      - helm upgrade --install --atomic --wait --timeout 2m ${DRONE_REPO_NAME} ./ --values ./values.yaml --values ./values-production.yaml --set image.tag=latest -n gripday-production-env
+      - helm upgrade --install --atomic --wait --timeout 2m ${DRONE_REPO_NAME} ./ --values ./values.yaml --values ./values-production.yaml --set image.tag=latest -n default
 
   # Step 2: Send deployment notification to Slack
   - name: notify-slack
