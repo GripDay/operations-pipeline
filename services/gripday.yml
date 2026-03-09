@@ -33,4 +33,4 @@ steps:
         from_secret: NEXUS_DEPLOYER_PASSWORD
     commands:
       - pnpm install # Install dependencies
-      - pnpm prettier:check # Verify code formatting
+      - pnpm formatter:check # Verify code formatting
